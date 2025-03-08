@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <cmath>
 using namespace glm;
+#include "object.h"
 #include "march.h"
 
 int main() {
