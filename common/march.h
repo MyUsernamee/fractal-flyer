@@ -31,6 +31,7 @@ float full_sdf(vec3 pos, Object objects[MAX_OBJECTS], int count);
 MarchData march(vec3 start, vec3 end, Object objects[MAX_OBJECTS], int count);
 vec3 get_normal(vec3 position, int sdf_type);
 vec3 get_world_normal(vec3 position, Object objects[MAX_OBJECTS], int count);
+vec3 get_world_normal_d(vec3 position, Object objects[MAX_OBJECTS], int count, float d) ;
 #endif
 
 #ifdef MARCH_H_IMPL
@@ -193,9 +194,7 @@ float full_sdf(vec3 pos, Object objects[MAX_OBJECTS], int count) {
 	float d = object_sdf(pos, objects[0]);
 
 	for (int i = 1; i < count; i++) {
-
 		d = intersection_type(object_sdf(pos, objects[i]), d, objects[i].intersection_type);
-
 	}
 
 	return d;
@@ -259,6 +258,15 @@ vec3 get_world_normal(vec3 position, Object objects[MAX_OBJECTS], int count) {
 	return normalize(vec3(dx, dy, dz));
 
 
+
+}
+
+vec3 get_world_normal_d(vec3 position, Object objects[MAX_OBJECTS], int count, float d) {
+
+	float dx = full_sdf(position + vec3(d, 0.0, 0.0), objects, count) - full_sdf(position - vec3(d, 0.0, 0.0), objects, count);
+	float dy = full_sdf(position + vec3(0.0, d, 0.0), objects, count) - full_sdf(position - vec3(0.0, d, 0.0), objects, count);
+	float dz = full_sdf(position + vec3(0.0, 0.0, d), objects, count) - full_sdf(position - vec3(0.0, 0.0, d), objects, count);
+	return normalize(vec3(dx, dy, dz));
 
 }
 

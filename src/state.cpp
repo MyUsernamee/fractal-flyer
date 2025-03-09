@@ -37,6 +37,14 @@ State* State::get_instance() {
 }
 
 void State::update_object_shader_buffer() {
+
+	if (player.object_index != objects.size() - 1) {
+		auto temp = objects[player.object_index];
+		objects.erase(objects.begin() + player.object_index);
+		objects.push_back(temp);
+		player.object_index = objects.size() - 1;
+	}
+
 	rlUpdateShaderBuffer(shader_buffer, objects.data(), sizeof(Object) * objects.size(), 0);
 	int size = objects.size();
 	set_uniform(march_shader, "global_object_count", &size, RL_SHADER_UNIFORM_INT);

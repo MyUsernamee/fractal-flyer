@@ -20,7 +20,7 @@ void main () {
 
 	vec3 ray_direction = normalize(vec3(fragTexCoord.x * 2.0 - 1.0, -fragTexCoord.y * 2.0 + 1.0, 1.0) * vec3(aspect_ratio, 1.0, 1.0));
 	vec4 ray_start = eye * vec4(0.0, 0.0, 0.0, 1.0);
-	vec4 ray_end = eye * (vec4(ray_direction * 10.0 - vec3(0.0, 0.0, 1.0), 1.0));
+	vec4 ray_end = eye * (vec4(ray_direction * 10.0 - vec3(0.0, 0.0, 3.0), 1.0));
 
 	MarchData data = march(vec3(ray_start), vec3(ray_end), global_objects, global_object_count);
 	if (data.intersection) {
