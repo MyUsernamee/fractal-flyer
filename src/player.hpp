@@ -13,6 +13,9 @@ public:
 	glm::vec3 get_position();
 	glm::vec3 get_view_angles();
 
+	void set_position(glm::vec3 a);
+	void set_view_angles(glm::vec3 a);
+
 	glm::mat4 get_camera_matrix();
 
 };
