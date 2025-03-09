@@ -12,7 +12,9 @@
 using namespace glm;
 #define CPP
 #include "object.h"
+#define MARCH_H_IMPL
 #include "march.h"
+#undef MARCH_H_IMPL
 
 #include "state.hpp"
 #include "utility.hpp"
@@ -48,7 +50,7 @@ int main() {
 
 	set_uniform(state->march_shader, "aspect_ratio", &aspect_ratio, RL_SHADER_UNIFORM_FLOAT);
 
-	state->player.set_position(vec3(0.0, 0.0, -1.0));
+	state->player.set_position(vec3(0.0, 0.0, -1.4));
 
 	while (!WindowShouldClose()) {
 
@@ -56,8 +58,7 @@ int main() {
 		set_uniform_matrix(state->march_shader, "eye", state->player.get_camera_matrix());
 		state->update_object_shader_buffer();
 
-		state->player.get_view_angles() += vec3(GetMouseDelta().y / 100.0, GetMouseDelta().x / 100.0, 0.0); 
-		state->player.get_position() += state->player.get_forward() * (IsKeyDown(KEY_W) ? 1.0f : 0.0f) * GetFrameTime();
+		state->player.update();
 
 		BeginDrawing();
 

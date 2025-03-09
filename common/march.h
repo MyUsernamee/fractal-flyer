@@ -12,33 +12,56 @@
 #define EPSILON 1e-4f
 #define INF 1e10
 
+#ifdef CPP
+struct MarchData;
+
+float mandelbulb(vec3 pos);
+float cube_sdf(vec3 p);
+float cross_sdf(vec3 p);
+float mengerSponge1(vec3 p);
+float sdBox(vec3 p, vec3 b);
+float sdSphere(vec3 p, float r);
+mat2 rotate(float a);
+vec3 trans(vec3 p, float s);
+float map(vec3 p);
+float sdf(vec3 pos, int sdf_type);
+float intersection_type(float a, float b, int intersection_type);
+float object_sdf(vec3 pos, Object object);
+float full_sdf(vec3 pos, Object objects[MAX_OBJECTS], int count);
+MarchData march(vec3 start, vec3 end, Object objects[MAX_OBJECTS], int count);
+vec3 get_normal(vec3 position, int sdf_type);
+vec3 get_world_normal(vec3 position, Object objects[MAX_OBJECTS], int count);
+#endif
+
+#ifdef MARCH_H_IMPL
+
 float mandelbulb(vec3 pos) {
-    vec3 z = pos;
-    float dr = 1.0;
-    float r = 0.0;
-    int iterations = 10;
-    float power = 8.0;
+	vec3 z = pos;
+	float dr = 1.0;
+	float r = 0.0;
+	int iterations = 10;
+	float power = 8.0;
 
-    for (int i = 0; i < iterations; i++) {
-        r = length(z);
-        if (r > 2.0) break;
+	for (int i = 0; i < iterations; i++) {
+		r = length(z);
+		if (r > 2.0) break;
 
-        // convert to polar coordinates
-        float theta = acos(z.z/r);
-        float phi = atan(z.y, z.x);
-        dr = pow(r, power - 1.0) * power * dr + 1.0;
+		// convert to polar coordinates
+		float theta = acos(z.z/r);
+		float phi = atan(z.y, z.x);
+		dr = pow(r, power - 1.0) * power * dr + 1.0;
 
-        // scale and rotate the point
-        float zr = pow(r, power);
-        theta *= power;
-        phi *= power;
+		// scale and rotate the point
+		float zr = pow(r, power);
+		theta *= power;
+		phi *= power;
 
-        // convert back to cartesian coordinates
-        z = zr * vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
-        z += pos;
-    }
+		// convert back to cartesian coordinates
+		z = zr * vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+		z += pos;
+	}
 
-    return 0.5 * log(r) * r / dr;
+	return 0.5 * log(r) * r / dr;
 }
 
 float cube_sdf(vec3 p){
@@ -63,20 +86,20 @@ float sdBox( vec3 p, vec3 b )
   return length(max(q,0.0f)) + min(max(q.x,max(q.y,q.z)),0.0f);
 }
 float sdSphere(vec3 p, float r){
-    return length(p) -r;
+	return length(p) -r;
 }
 
 mat2 rotate(float a){
-    float s = sin(a);
-    float c = cos(a);
-    return mat2(c, s,
-                -s, c);
+	float s = sin(a);
+	float c = cos(a);
+	return mat2(c, s,
+				-s, c);
 }
 
 vec3 trans(vec3 p, float s){
-        //Mirror
-        p = abs(p)-1.f*s;
-        p *= -1.;
+		//Mirror
+		p = abs(p)-1.f*s;
+		p *= -1.;
 		// Reflect column
 		if (p.x - p.y > 0.0) {
 			float temp = p.x;
@@ -88,9 +111,9 @@ vec3 trans(vec3 p, float s){
 			p.z = p.y;
 			p.y = temp;
 		}  //construct column
-        p.y = (abs(p.y-0.5*s)-0.5*s);
-        
-        return p;
+		p.y = (abs(p.y-0.5*s)-0.5*s);
+		
+		return p;
 }
 
 
@@ -99,29 +122,29 @@ float map(vec3 p) {
 
 
 	const int it = 8;
-    const float scale = pow(3, it-1);
+	const float scale = pow(3, it-1);
 
-    p*= scale;
-    
-    #ifdef rotations
-    p = trans(p, 27.*9.);
-    p.xy *= rotate(13.2);
-    p = trans(p, 27.*3.);
-    p.zy *= rotate(1.2);
-    p = trans(p, 27.);
-    p.xz *= rotate(13.12);
-    p = trans(p, 9.);
-    p.yz *= rotate(1.12);
-    p = trans(p, 3.);
-    p.yz *= rotate(6.12);
-    p = trans(p, 1.);
-    #else
+	p*= scale;
+	
+	#ifdef rotations
+	p = trans(p, 27.*9.);
+	p.xy *= rotate(13.2);
+	p = trans(p, 27.*3.);
+	p.zy *= rotate(1.2);
+	p = trans(p, 27.);
+	p.xz *= rotate(13.12);
+	p = trans(p, 9.);
+	p.yz *= rotate(1.12);
+	p = trans(p, 3.);
+	p.yz *= rotate(6.12);
+	p = trans(p, 1.);
+	#else
 	for (int i = it-1; i >= 0; i--) {
 		p = trans(p, pow(3, i));
 	}
-    #endif
+	#endif
 
-    return sdBox(p, vec3(.5))/scale - 0.0005;
+	return sdBox(p, vec3(.5))/scale - 0.0005;
 }
 
 // Example usage as your main SDF function:
@@ -160,7 +183,7 @@ float intersection_type(float a, float b, int intersection_type) {
 float object_sdf(vec3 pos, Object object) {
 
 	vec3 local_position = pos - vec3(object.model_matrix[3]);
-	float d = sdf(vec3(object.model_matrix * vec4(pos, 1.0)), object.sdf_type) / (length(local_position) / length(local_position * mat3(object.model_matrix)));
+	float d = sdf(vec3(inverse(object.model_matrix) * vec4(pos, 1.0)), object.sdf_type) * (length(local_position) / length(local_position * inverse(mat3(object.model_matrix))));
 
 	return d;
 }
@@ -238,3 +261,5 @@ vec3 get_world_normal(vec3 position, Object objects[MAX_OBJECTS], int count) {
 
 
 }
+
+#endif

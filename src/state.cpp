@@ -1,6 +1,7 @@
 #include "state.hpp"
 #include "utility.hpp"
 #include <rlgl.h>
+#include <march.h>
 
 
 State* State::instance = nullptr;
@@ -16,6 +17,14 @@ State* State::init() {
 	Image whiteImage = GenImageColor(1280, 720, WHITE);
 	new_state->white_texture = LoadTextureFromImage(whiteImage);
 	UnloadImage(whiteImage);
+
+	new_state->player.object_index = new_state->objects.size();
+	new_state->objects.push_back(Object{
+		SDF_SPHERE,
+		INTERSECTION_UNION,
+		mat4(0.008)
+	});
+
 
 	return new_state;
 

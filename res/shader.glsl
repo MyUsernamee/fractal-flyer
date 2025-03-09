@@ -13,6 +13,7 @@ layout(std430, binding = 1) buffer object_buffer
 in vec2 fragTexCoord;
 out vec4 finalColor;
 
+#define MARCH_H_IMPL
 #include <march.h>
 
 void main () {
