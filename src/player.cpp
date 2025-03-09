@@ -26,12 +26,12 @@ glm::vec3 &Player::get_view_angles() {
 
 glm::vec3 Player::get_forward() {
 
-	return from_euler(view_angles);
+	return vec3(get_camera_matrix() * vec4(0.0, 0.0, 1.0, 0.0));
 
 }
 glm::vec3 Player::get_right() {
 
-	return cross(UP, from_euler(view_angles));
+	return vec3(get_camera_matrix() * vec4(1.0, 0.0, 0.0, 0.0));
 
 }
 void Player::set_position(glm::vec3 new_position) {
@@ -47,11 +47,39 @@ void Player::set_view_angles(glm::vec3 new_view_angles) {
 }
 
 glm::mat4 Player::get_camera_matrix() {
-	vec3 normal = get_world_normal_d(get_position(), State::get_instance()->objects.data(), State::get_instance()->objects.size() - 1, 0.002f);
+	normal = get_world_normal_d(get_position(), State::get_instance()->objects.data(), State::get_instance()->objects.size() - 1, 0.0001f);
 	normal = (isnan(normal.x + normal.y + normal.z) ? UP : normal);
 
+	auto rotation_axis = cross((orientation_matrix[1]), normal);
+	float magnitude = length(rotation_axis);
+	if (magnitude < 0.00001f) {
+		rotation_axis = orientation_matrix[0];
+		magnitude = 1;
+	}
+	float angle = acos(dot(normal, orientation_matrix[1]));
+	rotation_axis = normalize(rotation_axis);
 
-	return glm::inverse(glm::lookAtLH(this->position - from_euler(this->view_angles) * 0.02f, this->position, normal));
+	mat4 rotation_matrix; 
+	vec3 view_direction; 
+	
+
+	if (abs(angle) > 0.01 && !isnan(angle)) {
+
+		// Construct rotation matrix
+		rotation_matrix = mat3(rotate(mat4(1.0), angle * GetFrameTime(), rotation_axis)) * orientation_matrix;
+		orientation_matrix = rotation_matrix;
+		view_direction = mat3(rotation_matrix) * from_euler(view_angles);
+		for (int i = 0; i < 3; ++i) {
+			orientation_matrix[i] = normalize(orientation_matrix[i]);
+		}
+		
+
+	}
+	else {
+		view_direction = orientation_matrix * from_euler(view_angles);
+	}
+
+	return inverse(lookAtLH(position - view_direction * 0.02f, position, orientation_matrix[1]));
 
 }
 

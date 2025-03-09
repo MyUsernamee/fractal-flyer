@@ -8,8 +8,12 @@ private:
 	glm::vec3 position;
 	glm::vec3 velocity;
 	glm::vec3 view_angles;
-
+	glm::vec3 last_up = glm::vec3(0.0, 1.0, 0.0);
+	
 public:
+	
+	glm::mat3 orientation_matrix = glm::mat3(1.0);
+	glm::vec3 normal;
 
 	int object_index = 0;
 

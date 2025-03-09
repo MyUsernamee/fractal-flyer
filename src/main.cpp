@@ -21,6 +21,23 @@ using namespace glm;
 
 #include <vector>
 
+// Function to project a 3D point into 2D, draw it, and connect it with a line
+void RenderPointWithLine2D(const glm::vec3& position, Vector2 origin, float scale, Color color) {
+
+    Vector2 projectedPos = {
+        origin.x + (position.x * scale - position.z * scale),
+        origin.y - scale * (position.y - position.x - position.z)
+    };
+
+    // Line thickness changes based on depth (closer = thicker)
+
+    // Draw a line from origin to the projected point
+    DrawLineEx(origin, projectedPos, 4.0, Fade(color, 0.7f));
+
+    // Render a circle at the projected position
+    // DrawCircleV(projectedPos, 5.0f * depthEffect * scale, color);
+}
+
 int main() {
 
 	InitWindow(1280, 720, "Fractal Flyer");
@@ -66,6 +83,16 @@ int main() {
 				DrawTexture(state->white_texture, 0, 0, WHITE);
 			EndShaderMode();
 
+			RenderPointWithLine2D(vec3(1.0, 0.0, 0.0), Vector2{100, 100}, 40.0, RED);
+			RenderPointWithLine2D(vec3(0.0, 1.0, 0.0), Vector2{100, 100}, 40.0, GREEN);
+			RenderPointWithLine2D(vec3(0.0, 0.0, 1.0), Vector2{100, 100}, 40.0, BLUE);
+			RenderPointWithLine2D(state->player.normal, Vector2{100, 100}, 40.0, YELLOW);
+			RenderPointWithLine2D(state->player.orientation_matrix[1], Vector2{100, 100}, 40.0, PURPLE);
+			RenderPointWithLine2D(cross(state->player.orientation_matrix[1], state->player.normal), Vector2{100, 100}, 40.0, ORANGE);
+
+			float dotProduct = dot(state->player.normal, state->player.orientation_matrix[1]);
+			float angle = acos(dotProduct);
+			DrawText(TextFormat("Angle: %.2f", angle), 10, 10, 20, WHITE);
 		EndDrawing();
 
 	}
