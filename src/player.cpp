@@ -100,7 +100,7 @@ void Player::update() {
 
 	if (d < 0.008){
 
-		get_velocity() += -dot(normal, get_velocity()) * normal;
+		get_velocity() += -dot(normal, get_velocity()) * normal * 1.4f;
 		get_velocity() *= 0.94;
 		get_position() += normal * (0.008f - d); 
 
