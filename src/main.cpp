@@ -34,6 +34,12 @@ int main() {
 		INTERSECTION_UNION,
 		mat4(1.0)
 	});
+	objects.push_back(
+	Object {
+		SDF_SPHERE,
+		INTERSECTION_SUBTRACT,
+		mat4(1.0)
+	});
 
 	InitWindow(1280, 720, "Fractal Flyer");
 
@@ -50,15 +56,15 @@ int main() {
 	}
 	int object_count = objects.size();
 
-	Shader test_shader = LoadShader(NULL, "res/shader.glsl");
+	Shader march_shader = LoadShader(NULL, "res/shader.glsl");
 
-	auto aspect_ratio_location = GetShaderLocation(test_shader, "aspect_ratio");
-	auto eye_location = GetShaderLocation(test_shader, "eye");
-	auto global_object_count_location = GetShaderLocation(test_shader, "global_object_count");
+	auto aspect_ratio_location = GetShaderLocation(march_shader, "aspect_ratio");
+	auto eye_location = GetShaderLocation(march_shader, "eye");
+	auto global_object_count_location = GetShaderLocation(march_shader, "global_object_count");
 
-	SetShaderValue(test_shader, aspect_ratio_location, &aspect_ratio, RL_SHADER_UNIFORM_FLOAT);
-	SetShaderValueMatrix(test_shader, eye_location, convert_to_rlgl_matrix(eye));
-	SetShaderValue(test_shader, global_object_count_location, &object_count, RL_SHADER_UNIFORM_INT);
+	SetShaderValue(march_shader, aspect_ratio_location, &aspect_ratio, RL_SHADER_UNIFORM_FLOAT);
+	SetShaderValueMatrix(march_shader, eye_location, convert_to_rlgl_matrix(eye));
+	SetShaderValue(march_shader, global_object_count_location, &object_count, RL_SHADER_UNIFORM_INT);
 
 	Image whiteImage = GenImageColor(1280, 720, WHITE);
 	Texture whiteTexture = LoadTextureFromImage(whiteImage);
@@ -69,11 +75,11 @@ int main() {
 		rlBindShaderBuffer(test_buffer, 1);
 
 		eye = inverse(lookAtLH(vec3(0.0, 0.0, -2.0), glm::vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0)));
-		SetShaderValueMatrix(test_shader, eye_location, convert_to_rlgl_matrix(eye));
+		SetShaderValueMatrix(march_shader, eye_location, convert_to_rlgl_matrix(eye));
 
 		BeginDrawing();
 
-			BeginShaderMode(test_shader);
+			BeginShaderMode(march_shader);
 				DrawTexture(whiteTexture, 0, 0, WHITE);
 			EndShaderMode();
 
