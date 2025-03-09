@@ -14,6 +14,12 @@ glm::vec3 &Player::get_view_angles() {
 
 }
 
+glm::vec3 Player::get_forward() {
+
+	return from_euler(view_angles);
+
+}
+
 void Player::set_position(glm::vec3 new_position) {
 
 	this->position = new_position;

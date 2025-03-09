@@ -8,8 +8,8 @@
 #define INTERSECTION_SUBTRACT 1
 #define INTERSECTION_INTERSECT 2
 
-#define MAX_STEPS 1024
-#define EPSILON 0.001
+#define MAX_STEPS 256
+#define EPSILON 1e-4f
 #define INF 1e10
 
 float mandelbulb(vec3 pos) {
@@ -97,7 +97,9 @@ vec3 trans(vec3 p, float s){
 // I don't know why but putting the calls to trans in a loop caused some weid behavioirs
 float map(vec3 p) {
 
-    const float scale = 260.;
+
+	const int it = 8;
+    const float scale = pow(3, it-1);
 
     p*= scale;
     
@@ -114,13 +116,9 @@ float map(vec3 p) {
     p.yz *= rotate(6.12);
     p = trans(p, 1.);
     #else
-    p = trans(p, 27.*9.);
-    p = trans(p, 27.*3.);
-    p = trans(p, 27.);
-    p = trans(p, 9.);
-    p = trans(p, 3.);
-    p = trans(p, 1.);
-    
+	for (int i = it-1; i >= 0; i--) {
+		p = trans(p, pow(3, i));
+	}
     #endif
 
     return sdBox(p, vec3(.5))/scale - 0.0005;

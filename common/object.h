@@ -2,14 +2,11 @@
 
 #define MAX_OBJECTS 8
 
-struct Object;
-
-#ifndef OBJECT_H
-#define OBJECT_H
 
 #ifdef CPP
 #include <glm/glm.hpp>
 using namespace glm;
+#pragma once
 #endif
 
 struct Object {
@@ -20,5 +17,3 @@ struct Object {
 	#endif
 	mat4 model_matrix;
 };
-
-#endif

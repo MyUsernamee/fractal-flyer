@@ -57,8 +57,7 @@ int main() {
 		state->update_object_shader_buffer();
 
 		state->player.get_view_angles() += vec3(GetMouseDelta().y / 100.0, GetMouseDelta().x / 100.0, 0.0); 
-
-		
+		state->player.get_position() += state->player.get_forward() * (IsKeyDown(KEY_W) ? 1.0f : 0.0f) * GetFrameTime();
 
 		BeginDrawing();
 
