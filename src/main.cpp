@@ -14,6 +14,8 @@ using namespace glm;
 #include "object.h"
 #include "march.h"
 
+#include "state.hpp"
+
 #include <vector>
 
 Matrix convert_to_rlgl_matrix(mat4 m) {
@@ -28,6 +30,8 @@ Matrix convert_to_rlgl_matrix(mat4 m) {
 
 int main() {
 	
+	State::init();
+
 	std::vector<Object> objects;
 	objects.push_back(Object {
 		SDF_SPONGE,
