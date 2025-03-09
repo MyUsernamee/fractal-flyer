@@ -56,6 +56,10 @@ int main() {
 		set_uniform_matrix(state->march_shader, "eye", state->player.get_camera_matrix());
 		state->update_object_shader_buffer();
 
+		state->player.get_view_angles() += vec3(GetMouseDelta().y / 100.0, GetMouseDelta().x / 100.0, 0.0); 
+
+		
+
 		BeginDrawing();
 
 			BeginShaderMode(march_shader);

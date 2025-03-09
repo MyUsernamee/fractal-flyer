@@ -2,13 +2,13 @@
 #include "utility.hpp"
 #include <glm/ext/matrix_transform.hpp>
 
-glm::vec3 Player::get_position() {
+glm::vec3 &Player::get_position() {
 
 	return this->position;
 
 }
 
-glm::vec3 Player::get_view_angles() {
+glm::vec3 &Player::get_view_angles() {
 
 	return this->view_angles;
 
