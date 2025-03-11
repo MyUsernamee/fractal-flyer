@@ -3,12 +3,15 @@
 #define SDF_SPHERE 0
 #define SDF_CUBE 1
 #define SDF_SPONGE 2
+#define SDF_MANDLE 3
+#define SDF_WEIRD 4
 
 #define INTERSECTION_UNION 0
 #define INTERSECTION_SUBTRACT 1
 #define INTERSECTION_INTERSECT 2
+#define INTERSECTION_WEIRD 3
 
-#define MAX_STEPS 256
+#define MAX_STEPS 1024
 #define EPSILON 1e-4f
 #define INF 1e10
 
@@ -122,7 +125,7 @@ vec3 trans(vec3 p, float s){
 float map(vec3 p) {
 
 
-	const int it = 8;
+	const int it = 16;
 	const float scale = pow(3, it-1);
 
 	p*= scale;
@@ -148,8 +151,27 @@ float map(vec3 p) {
 	return sdBox(p, vec3(.5))/scale - 0.0005;
 }
 
+// quartic polynomial
+float smin( float a, float b, float k )
+{
+    k *= 16.0f/3.0f;
+    float h = max( k-abs(a-b), 0.0f )/k;
+    return min(a,b) - h*h*h*(4.0f-h)*k*(1.0f/16.0f);
+}
+
+vec3 bend(vec3 p) {
+	const float k = 10.0;
+	float c = cos(k * p.x);
+	float s = sin(k * p.x);
+	mat2 m = mat2(vec2(c, c), vec2(-s, s));
+	vec3 q = vec3(m * vec2(p), p.z);
+	return q; 
+}
+
 // Example usage as your main SDF function:
 float sdf(vec3 pos, int sdf_type) {
+
+	float m;
 
 	switch(sdf_type){
 		case SDF_SPHERE:
@@ -161,12 +183,23 @@ float sdf(vec3 pos, int sdf_type) {
 		case SDF_SPONGE:
 			return map(pos);
 			break;
+		case SDF_MANDLE:
+			return mandelbulb(pos);
+			break;
+		case SDF_WEIRD:
+			return sdSphere(vec3(cube_sdf(pos), pos.y, pos.z), 1.0f);
+			break;
 		default:
 			return INF;
 			break;
 	}
 
 }
+
+struct IntersectionData {
+	float d;
+	bool which;
+};
 
 float intersection_type(float a, float b, int intersection_type) {
 	switch(intersection_type) {
@@ -176,6 +209,8 @@ float intersection_type(float a, float b, int intersection_type) {
 			return max(-a, b);
 		case INTERSECTION_INTERSECT:
 			return max(a, b);
+		case INTERSECTION_WEIRD:
+			return min(a, sin(b * 3.1415f));
 		default:
 			return INF;
 	}
