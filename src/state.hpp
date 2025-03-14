@@ -7,21 +7,25 @@
 #include <raylib.h>
 
 // Game state singleton
-class State {
+class Game {
 
 private:
 
 
 public:
-	static State* init();
+	static Game* init();
 	
-	static State* instance;
-	static State* get_instance();	
+	static Game* instance;
+	static Game* get_instance();	
 	
-	void update_object_shader_buffer(); // Updates the shader object buffer on the gpu
+	static void main_loop();
+	static bool should_close();
+
+	static void update_object_shader_buffer(); // Updates the shader object buffer on the gpu
 	
 	Texture white_texture;
 	Player player;
+	
 	std::vector<Object> objects;
 	Shader march_shader;
 	unsigned int shader_buffer;

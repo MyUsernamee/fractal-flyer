@@ -2,6 +2,9 @@
 
 #include <glm/glm.hpp>
 
+#define PLAYER_SIZE 0.008f
+#define GRAVITY 0.05f
+
 class Player {
 
 private:
@@ -29,5 +32,6 @@ public:
 	glm::mat4 get_camera_matrix();
 
 	void update();
+	void do_collision(glm::vec3 normal);
 
 };

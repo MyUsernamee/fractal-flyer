@@ -42,59 +42,11 @@ int main() {
 
 	InitWindow(1280, 720, "Fractal Flyer");
 	
-	State::init();
-	auto state = State::get_instance();
+	Game::init();
+	auto state = Game::get_instance();
 
-	auto & objects = state->objects;
-
-	objects.push_back(Object {
-		SDF_SPONGE,
-		INTERSECTION_UNION,
-		mat4(1.0)
-	});
-	objects.push_back(
-	Object {
-		SDF_SPHERE,
-		INTERSECTION_SUBTRACT,
-		mat4(1.0)
-	});
-
-	state->update_object_shader_buffer();
-
-	float aspect_ratio = (float)GetRenderWidth() / (float)GetRenderHeight();
-
-	auto march_shader = state->march_shader;
-
-	set_uniform(state->march_shader, "aspect_ratio", &aspect_ratio, RL_SHADER_UNIFORM_FLOAT);
-
-	state->player.set_position(vec3(0.0, 0.0, -1.4));
-
-	while (!WindowShouldClose()) {
-
-		rlBindShaderBuffer(state->shader_buffer, 1);
-		set_uniform_matrix(state->march_shader, "eye", state->player.get_camera_matrix());
-		state->update_object_shader_buffer();
-
-		state->player.update();
-
-		BeginDrawing();
-
-			BeginShaderMode(march_shader);
-				DrawTexture(state->white_texture, 0, 0, WHITE);
-			EndShaderMode();
-
-			RenderPointWithLine2D(vec3(1.0, 0.0, 0.0), Vector2{100, 100}, 40.0, RED);
-			RenderPointWithLine2D(vec3(0.0, 1.0, 0.0), Vector2{100, 100}, 40.0, GREEN);
-			RenderPointWithLine2D(vec3(0.0, 0.0, 1.0), Vector2{100, 100}, 40.0, BLUE);
-			RenderPointWithLine2D(state->player.normal, Vector2{100, 100}, 40.0, YELLOW);
-			RenderPointWithLine2D(state->player.orientation_matrix[1], Vector2{100, 100}, 40.0, PURPLE);
-			RenderPointWithLine2D(cross(state->player.orientation_matrix[1], state->player.normal), Vector2{100, 100}, 40.0, ORANGE);
-
-			float dotProduct = dot(state->player.normal, state->player.orientation_matrix[1]);
-			float angle = acos(dotProduct);
-			DrawText(TextFormat("Angle: %.2f", angle), 10, 10, 20, WHITE);
-		EndDrawing();
-
+	while (!Game::should_close()) {
+		Game::main_loop();
 	}
 
 	CloseWindow();

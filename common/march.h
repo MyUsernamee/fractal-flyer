@@ -4,12 +4,17 @@
 #define SDF_CUBE 1
 #define SDF_SPONGE 2
 #define SDF_MANDLE 3
-#define SDF_WEIRD 4
+#define SDF_DONUT 4
+#define SDF_WEIRD 5
 
 #define INTERSECTION_UNION 0
 #define INTERSECTION_SUBTRACT 1
 #define INTERSECTION_INTERSECT 2
 #define INTERSECTION_WEIRD 3
+
+#define WARP_NONE 0
+#define WARP_WRAP 1
+#define WARP_SIN 2
 
 #define MAX_STEPS 1024
 #define EPSILON 1e-4f
@@ -26,6 +31,7 @@ float sdBox(vec3 p, vec3 b);
 float sdSphere(vec3 p, float r);
 mat2 rotate(float a);
 vec3 trans(vec3 p, float s);
+vec3 warp(vec3 p, int warp_type);
 float map(vec3 p);
 float sdf(vec3 pos, int sdf_type);
 float intersection_type(float a, float b, int intersection_type);
@@ -151,6 +157,14 @@ float map(vec3 p) {
 	return sdBox(p, vec3(.5))/scale - 0.0005;
 }
 
+float donut_sdf(vec3 pos, float r, float w) {
+
+	vec3 closest_point = normalize(vec3(pos.x, 0.0, pos.z)) * r;
+
+	return length (pos - closest_point) - w;
+
+}
+
 // quartic polynomial
 float smin( float a, float b, float k )
 {
@@ -168,10 +182,24 @@ vec3 bend(vec3 p) {
 	return q; 
 }
 
+vec3 apply_warp(vec3 p, int type) {
+	switch (type) {
+		case WARP_NONE:
+			return p;
+		case WARP_WRAP:
+			return p - round(p);
+		case WARP_SIN:
+			return p + vec3(0.0, sin(p.x), 0.0);
+	}
+	
+	return p;
+}
+
 // Example usage as your main SDF function:
 float sdf(vec3 pos, int sdf_type) {
 
 	float m;
+	vec3 p = vec3(1.0);
 
 	switch(sdf_type){
 		case SDF_SPHERE:
@@ -186,8 +214,20 @@ float sdf(vec3 pos, int sdf_type) {
 		case SDF_MANDLE:
 			return mandelbulb(pos);
 			break;
+		case SDF_DONUT:
+			return donut_sdf(pos, 1.0, 0.25);
 		case SDF_WEIRD:
-			return sdSphere(vec3(cube_sdf(pos), pos.y, pos.z), 1.0f);
+			
+			return max(-donut_sdf(pos, 1.0, 1.0), sdSphere(pos, 1.0));
+
+			m = 0.0;
+			
+			for (int i = 0; i < 16; i++) {
+			
+				
+
+			}
+
 			break;
 		default:
 			return INF;
@@ -217,6 +257,8 @@ float intersection_type(float a, float b, int intersection_type) {
 }
 
 float object_sdf(vec3 pos, Object object) {
+
+	pos = vec3(inverse(object.warp_matrix) * vec4(apply_warp(vec3(object.warp_matrix * vec4(pos, 1.0)), object.warp_type), 1.0));
 
 	vec3 local_position = pos - vec3(object.model_matrix[3]);
 	float d = sdf(vec3(inverse(object.model_matrix) * vec4(pos, 1.0)), object.sdf_type) * (length(local_position) / length(local_position * inverse(mat3(object.model_matrix))));
