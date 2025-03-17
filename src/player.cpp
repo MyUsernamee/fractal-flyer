@@ -26,14 +26,18 @@ glm::vec3 &Player::get_view_angles() {
 
 glm::vec3 Player::get_forward() {
 
-	return vec3(get_camera_matrix() * vec4(0.0, 0.0, 1.0, 0.0));
+	return vec3(get_player_matrix() * vec4(0.0, 0.0, 1.0, 0.0));
 
 }
 glm::vec3 Player::get_right() {
 
-	return vec3(get_camera_matrix() * vec4(1.0, 0.0, 0.0, 0.0));
+	return vec3(get_player_matrix() * vec4(1.0, 0.0, 0.0, 0.0));
 
 }
+glm::vec3 Player::get_up() {
+	return vec3(get_player_matrix() * vec4(0.0, 1.0, 0.0, 0.0));
+}
+
 void Player::set_position(glm::vec3 new_position) {
 
 	this->position = new_position;
@@ -46,6 +50,11 @@ void Player::set_view_angles(glm::vec3 new_view_angles) {
 
 }
 
+glm::mat4 Player::get_player_matrix() {
+
+	return inverse(lookAtLH(get_position(), get_position() + from_euler(view_angles), UP));	
+
+}
 glm::mat4 Player::get_camera_matrix() {
 
 	return inverse(lookAtLH(get_position() - from_euler(view_angles) * PLAYER_SIZE * 3.0f, get_position(), UP));	
@@ -62,6 +71,9 @@ void Player::update() {
 	get_position() += get_velocity() * GetFrameTime(); // * 
 
 	get_velocity() -= UP * GetFrameTime() * GRAVITY;
+
+	// Apply flying force
+	get_velocity() = get_forward() * length(get_velocity());
 
 	do_collision(normal);
 	

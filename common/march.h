@@ -126,6 +126,17 @@ vec3 trans(vec3 p, float s){
 		return p;
 }
 
+vec3 rotateX(vec3 p, float theta) {
+	return vec3(p.x, cos(theta) * p.y - sin(theta) * p.z, cos(theta) * p.z + sin(theta) * p.y);
+}
+vec3 rotateY(vec3 p, float theta) {
+	return vec3(cos(theta) * p.x - sin(theta) * p.z, p.y, cos(theta) * p.z + sin(theta) * p.x);
+}
+vec3 rotateZ(vec3 p, float theta) {
+	return vec3(cos(theta) * p.x - sin(theta) * p.y, cos(theta) * p.y + sin(theta) * p.x, p.z);
+}
+
+
 
 // I don't know why but putting the calls to trans in a loop caused some weid behavioirs
 float map(vec3 p) {
@@ -151,6 +162,9 @@ float map(vec3 p) {
 	#else
 	for (int i = it-1; i >= 0; i--) {
 		p = trans(p, pow(3, i));
+		p = rotateX(p, 0.5);
+		p = rotateY(p, 1.0);
+		p = rotateZ(p, 1.0);
 	}
 	#endif
 
@@ -218,16 +232,21 @@ float sdf(vec3 pos, int sdf_type) {
 			return donut_sdf(pos, 1.0, 0.25);
 		case SDF_WEIRD:
 			
-			return max(-donut_sdf(pos, 1.0, 1.0), sdSphere(pos, 1.0));
-
-			m = 0.0;
-			
+		
+			m = 99999999.0;
+		
 			for (int i = 0; i < 16; i++) {
 			
-				
+				m = min(max(-donut_sdf(pos, 1.0, 1.0), sdSphere(pos, 1.0)) / float(pow(2.0f, i)), m);
+				pos.y = abs(pos.y);
+				pos.x = abs(pos.x);
+				pos -= vec3(0.0, 1.0, 0.0);
+
+				pos = vec3(pos.y, pos.x, pos.z) * 2.0f;
 
 			}
-
+			
+			return m;
 			break;
 		default:
 			return INF;

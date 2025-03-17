@@ -20,14 +20,14 @@ Game* Game::init() {
 
 	new_state->objects.push_back(
 		Object {
-			SDF_WEIRD,
+			SDF_SPONGE,
 			INTERSECTION_UNION,
 			WARP_NONE,
 			mat4(1.0)
 		}
 	);
 
-	new_state->player.get_position() += vec3(0.1, 0.0, 0.0);
+	new_state->player.get_position() += vec3(0.0, 2.0, 0.0);
 
 	new_state->player.object_index = new_state->objects.size();
 	new_state->objects.push_back(Object{

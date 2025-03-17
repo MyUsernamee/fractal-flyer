@@ -30,7 +30,7 @@ void main () {
 
 		float light_product = dot(normal, normalize(vec3(1.0, 1.0, -1.0)));
 		float shadow_amount = shadow_march.intersection ? 0.0f : 1.0f;
-		finalColor = vec4(vec3((1.0 - pow(data.steps, -0.5)) * 0.25 * (1.0 - shadow_amount) + max(light_product, 0.0) * shadow_amount), 1.0);
+		finalColor = vec4(vec3((pow(data.steps, -0.50)) * 0.25 + max(light_product, 0.0) * shadow_amount), 1.0);
 		// finalColor = vec4(vec3(data.intersection ? 1.0 : 0.0), 1.0);
 	}
 	else {

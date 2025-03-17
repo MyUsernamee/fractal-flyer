@@ -25,10 +25,12 @@ public:
 	glm::vec3 &get_view_angles();
 	glm::vec3 get_forward();
 	glm::vec3 get_right();
+	glm::vec3 get_up();
 
 	void set_position(glm::vec3 a);
 	void set_view_angles(glm::vec3 a);
 
+	glm::mat4 get_player_matrix();
 	glm::mat4 get_camera_matrix();
 
 	void update();
