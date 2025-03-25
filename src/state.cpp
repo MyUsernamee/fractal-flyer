@@ -23,6 +23,7 @@ Game* Game::init() {
 			SDF_SPONGE,
 			INTERSECTION_UNION,
 			WARP_NONE,
+			vec4(1.0, 0.0, 0.0, .0)
 			mat4(4.0)
 		}
 	);

@@ -20,11 +20,10 @@
 #define EPSILON 1e-3f
 #define INF 1e10
 
-#define length(x) d_length(x)
-#define normalize(x) x / d_length(x)
-
 #ifdef CPP
 struct MarchData;
+struct FractalData;
+struct PlayerData;
 
 float mandelbulb(vec3 pos);
 float cube_sdf(vec3 p);
@@ -36,29 +35,32 @@ mat2 rotate(float a);
 vec3 trans(vec3 p, float s);
 vec3 warp(vec3 p, int warp_type);
 float map(vec3 p);
-float sdf(vec3 pos, int sdf_type);
-float intersection_type(float a, float b, int intersection_type);
-float object_sdf(vec3 pos, Object object);
-float full_sdf(vec3 pos, Object objects[MAX_OBJECTS], int count);
-MarchData march(vec3 start, vec3 end, Object objects[MAX_OBJECTS], int count);
-vec3 get_normal(vec3 position, int sdf_type);
-vec3 get_world_normal(vec3 position, Object objects[MAX_OBJECTS], int count);
-vec3 get_world_normal_d(vec3 position, Object objects[MAX_OBJECTS], int count, float d) ;
-float d_length(vec3 p);
+float fractal_sdf(vec3 pos, FractalData fractal_data);
+float player_sdf(vec3 pos, PlayerData player_data);
+float scene_sdf(vec3 pos, FractalData fractal_data, PlayerData player_data);
+MarchData march(vec3 start, FractalData fractal_data, PlayerData player_data);
+vec3 get_normal(vec3 position, FractalData fractal_data, PlayerData player_data);
 #endif
 
 #ifdef MARCH_H_IMPL
+struct MarchData {
+	float t;
+	vec3 position;
+	int steps;
+	bool intersection;
+	vec4 color;
+};
 
-float d_sqrt(float x) {
-	return sqrt(x);
-}
+struct FractalData {
+	vec3 color;
+	mat4 model_matrix;
+	vec3 parameter1;
+	vec3 parameter2;
+};
 
-float d_length(vec3 p) {
-
-	float x = dot(p, p);
-	return d_sqrt(x);
-
-}
+struct PlayerData {
+	mat4 model_matrix;
+};
 
 float mandelbulb(vec3 pos) {
 	vec3 z = pos;
@@ -224,114 +226,21 @@ vec3 apply_warp(vec3 p, int type) {
 	return p;
 }
 
-// Example usage as your main SDF function:
-float sdf(vec3 pos, int sdf_type) {
 
-	float m;
-	vec3 p = vec3(1.0);
 
-	switch(sdf_type){
-		case SDF_SPHERE:
-			return sdSphere(pos, 1.0);
-			break;
-		case SDF_CUBE:
-			return cube_sdf(pos);
-			break;
-		case SDF_SPONGE:
-			return map(pos);
-			break;
-		case SDF_MANDLE:
-			return mandelbulb(pos);
-			break;
-		case SDF_DONUT:
-			return donut_sdf(pos, 1.0, 0.25);
-		case SDF_WEIRD:
-			
-		
-			m = 99999999.0;
-		
-			for (int i = 0; i < 16; i++) {
-			
-				m = min(max(-donut_sdf(pos, 1.0, 1.0), sdSphere(pos, 1.0)) / float(pow(2.0f, i)), m);
-				pos.y = abs(pos.y);
-				pos.x = abs(pos.x);
-				pos -= vec3(0.0, 1.0, 0.0);
-
-				pos = vec3(pos.y, pos.x, pos.z) * 2.0f;
-
-			}
-			
-			return m;
-			break;
-		default:
-			return INF;
-			break;
-	}
-
-}
-
-struct IntersectionData {
-	float d;
-	bool which;
-};
-
-float intersection_type(float a, float b, int intersection_type) {
-	switch(intersection_type) {
-		case INTERSECTION_UNION:
-			return min(a, b);
-		case INTERSECTION_SUBTRACT:
-			return max(-a, b);
-		case INTERSECTION_INTERSECT:
-			return max(a, b);
-		case INTERSECTION_WEIRD:
-			return min(a, sin(b * 3.1415f));
-		default:
-			return INF;
-	}
-}
-
-float object_sdf(vec3 pos, Object object) {
-
-	pos = vec3(inverse(object.warp_matrix) * vec4(apply_warp(vec3(object.warp_matrix * vec4(pos, 1.0)), object.warp_type), 1.0));
-
-	vec3 local_position = pos - vec3(object.model_matrix[3]);
-	float d = sdf(vec3(inverse(object.model_matrix) * vec4(pos, 1.0)), object.sdf_type) * (length(local_position) / length(local_position * inverse(mat3(object.model_matrix))));
-
-	return d;
-}
-
-float full_sdf(vec3 pos, Object objects[MAX_OBJECTS], int count) {
-
-	float d = object_sdf(pos, objects[0]);
-
-	for (int i = 1; i < count; i++) {
-		d = intersection_type(object_sdf(pos, objects[i]), d, objects[i].intersection_type);
-	}
-
-	return d;
-
-}
-
-struct MarchData {
-	float t;
-	vec3 position;
-	int steps;
-	bool intersection;
-};
-
-MarchData march(vec3 start, vec3 end, Object objects[MAX_OBJECTS], int count) {
+MarchData march(vec3 start, vec3 end, FractalData fractal_data, PlayerData player_data) {
 
 	MarchData data;
 	data.intersection = false;
 	data.position = start;
 	float max_t = length(end - start);
 	vec3 direction = (end - start) / max_t; // Normalized direction
-	float d = full_sdf(start, objects, count);
+	float d = scene_sdf(start, fractal_data, player_data);
 
 	while (d > EPSILON) {
 
 		data.position += direction * d;
-		d = full_sdf(data.position, objects, count);
+		d = scene_sdf(data.position, fractal_data, player_data);
 
 		data.t += d;
 		data.steps += 1;		

@@ -4,12 +4,6 @@ uniform float aspect_ratio;
 uniform int global_object_count;
 uniform mat4 eye;
 
-#include <object.h>
-
-layout(std430, binding = 1) buffer object_buffer
-{
-    Object global_objects[MAX_OBJECTS];
-};
 in vec2 fragTexCoord;
 out vec4 finalColor;
 

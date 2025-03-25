@@ -13,6 +13,7 @@ struct Object {
 	int sdf_type;
 	int intersection_type;
 	int warp_type;
+	vec4 color;
 	#ifdef CPP
 	alignas(16) 
 	#endif
