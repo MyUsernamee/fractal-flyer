@@ -1,6 +1,7 @@
 #include "player.hpp"
 #include "utility.hpp"
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext.hpp>
 #include "state.hpp"
 #include "march.h"
 
@@ -18,11 +19,6 @@ glm::vec3 &Player::get_velocity() {
 
 }
 
-glm::vec3 &Player::get_view_angles() {
-
-	return this->view_angles;
-
-}
 
 glm::vec3 Player::get_forward() {
 
@@ -44,20 +40,19 @@ void Player::set_position(glm::vec3 new_position) {
 
 }
 
-void Player::set_view_angles(glm::vec3 new_view_angles) {
-
-	this->view_angles = new_view_angles;
-
-}
-
 glm::mat4 Player::get_player_matrix() {
+	glm::mat4 new_mat = mat4(orientation_matrix);
+	new_mat[3] = vec4(get_position() - orientation_matrix * vec3(0.0, 0.0, 0.0), 1.0);
 
-	return inverse(lookAtLH(get_position(), get_position() + from_euler(view_angles), UP));	
+	return new_mat;	
 
 }
 glm::mat4 Player::get_camera_matrix() {
 
-	return inverse(lookAtLH(get_position() - from_euler(view_angles) * PLAYER_SIZE * 3.0f, get_position(), UP));	
+	glm::mat4 new_mat = mat4(orientation_matrix);
+	new_mat[3] = vec4(get_position() - orientation_matrix * vec3(0.0, -0.03, 0.1), 1.0);
+
+	return (new_mat);
 
 }
 
@@ -67,7 +62,12 @@ void Player::update() {
 
 	vec3 normal = get_world_normal(get_position(), Game::instance->objects.data(), Game::get_instance()->objects.size() - 1);
 
-	get_view_angles() += vec3(GetMouseDelta().y / 100.0, GetMouseDelta().x / 100.0, 0.0); 
+	mat3 pitch = mat3(rotate(mat4(1.0), -GetMouseDelta().y / 100.0f, vec3(1.0, 0.0, 0.0)) );
+	mat3 roll = mat3(rotate(mat4(1.0), -GetMouseDelta().x / 100.0f, vec3(0.0, 0.0, 1.0)) );
+	SetMousePosition(GetRenderWidth() / 2, GetRenderHeight() / 2);
+
+	orientation_matrix = orientation_matrix * pitch * roll;
+
 	get_position() += get_velocity() * GetFrameTime(); // * 
 
 	get_velocity() -= UP * GetFrameTime() * GRAVITY;

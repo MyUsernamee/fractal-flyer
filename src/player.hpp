@@ -10,8 +10,6 @@ class Player {
 private:
 	glm::vec3 position;
 	glm::vec3 velocity;
-	glm::vec3 view_angles;
-	glm::vec3 last_up = glm::vec3(0.0, 1.0, 0.0);
 	
 public:
 	
@@ -22,7 +20,6 @@ public:
 
 	glm::vec3 &get_position();
 	glm::vec3 &get_velocity();
-	glm::vec3 &get_view_angles();
 	glm::vec3 get_forward();
 	glm::vec3 get_right();
 	glm::vec3 get_up();

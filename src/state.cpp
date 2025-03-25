@@ -14,7 +14,7 @@ Game* Game::init() {
 	new_state->march_shader = LoadShader(NULL, "res/shader.glsl");
 	new_state->shader_buffer = rlLoadShaderBuffer(MAX_OBJECTS * sizeof(Object), NULL, RL_DYNAMIC_COPY);
 
-	Image whiteImage = GenImageColor(1280, 720, WHITE);
+	Image whiteImage = GenImageColor(GetRenderWidth(), GetRenderHeight(), WHITE);
 	new_state->white_texture = LoadTextureFromImage(whiteImage);
 	UnloadImage(whiteImage);
 
@@ -23,7 +23,7 @@ Game* Game::init() {
 			SDF_SPONGE,
 			INTERSECTION_UNION,
 			WARP_NONE,
-			mat4(1.0)
+			mat4(4.0)
 		}
 	);
 

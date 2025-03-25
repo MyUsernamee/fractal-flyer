@@ -40,7 +40,10 @@ void RenderPointWithLine2D(const glm::vec3& position, Vector2 origin, float scal
 
 int main() {
 
-	InitWindow(1280, 720, "Fractal Flyer");
+	SetConfigFlags(FLAG_WINDOW_TOPMOST | FLAG_WINDOW_UNDECORATED);
+	InitWindow(GetScreenWidth(), GetScreenHeight(), "Fractal Flyer");
+	HideCursor();
+	
 	
 	Game::init();
 	auto state = Game::get_instance();

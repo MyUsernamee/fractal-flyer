@@ -17,8 +17,11 @@
 #define WARP_SIN 2
 
 #define MAX_STEPS 1024
-#define EPSILON 1e-4f
+#define EPSILON 1e-3f
 #define INF 1e10
+
+#define length(x) d_length(x)
+#define normalize(x) x / d_length(x)
 
 #ifdef CPP
 struct MarchData;
@@ -41,9 +44,21 @@ MarchData march(vec3 start, vec3 end, Object objects[MAX_OBJECTS], int count);
 vec3 get_normal(vec3 position, int sdf_type);
 vec3 get_world_normal(vec3 position, Object objects[MAX_OBJECTS], int count);
 vec3 get_world_normal_d(vec3 position, Object objects[MAX_OBJECTS], int count, float d) ;
+float d_length(vec3 p);
 #endif
 
 #ifdef MARCH_H_IMPL
+
+float d_sqrt(float x) {
+	return sqrt(x);
+}
+
+float d_length(vec3 p) {
+
+	float x = dot(p, p);
+	return d_sqrt(x);
+
+}
 
 float mandelbulb(vec3 pos) {
 	vec3 z = pos;
@@ -142,7 +157,7 @@ vec3 rotateZ(vec3 p, float theta) {
 float map(vec3 p) {
 
 
-	const int it = 16;
+	const int it = 8;
 	const float scale = pow(3, it-1);
 
 	p*= scale;
